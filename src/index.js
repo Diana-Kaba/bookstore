@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import booksData from "./books.js";
-import logo from "./logo.svg";
+import logo from "./comic-logo.png";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./books.css";
@@ -39,7 +39,6 @@ class App extends React.Component {
         <div className="container text-center">
           <div className="row justify-content-center">
             {visibleBooks.map((book) => {
-              console.log(book.id);
               return (
                 <div className="col-sm-4 col-12" key={book.id}>
                   <div className="card text-center my-5 p-3">
@@ -55,16 +54,18 @@ class App extends React.Component {
           </div>
         </div>
         <div className="container-fluid text-center">
-          <h4>Кошик товарів</h4>
-          <p>Кількість книг: {this.state.cart.length} </p>
+          <h4>Basket of goods</h4>
+          <p>Number of books: {this.state.cart.length} </p>
           <ul className="list-group">
             {this.state.cart.map((book) => (
               <li key={book.id} className="list-group-item">
                 <div className="row">
-                  <div className="col-4">{book.name}</div>
+                  <div className="col-2">{book.name}</div>
                   <div className="col-3">{book.author}</div>
-                  <div className="col-2">{book.price}</div>
+                  <div className="col-1">${book.price}</div>
                   <div className="col-1">{book.count}</div>
+                  <div className="col-2">{book.category}</div>
+                  <div className="col-1">{book.year}</div>
                   <div className="col-2">
                     <button
                       onClick={this.deleteBookFromCart.bind(this, book)}
@@ -97,7 +98,6 @@ class App extends React.Component {
     const updateBooks = this.state.books.filter(function (item) {
       return item.id !== book.id;
     });
-    console.log(updateBooks);
     this.setState({
       books: updateBooks,
     });
@@ -158,7 +158,7 @@ function Header(props) {
   return (
     <div className={props.className}>
       <Image src={logo} />
-      <h1 className="display-2">Книжковий магазин</h1>
+      <h1 className="display-2">Comic book store</h1>
     </div>
   );
 }
@@ -167,10 +167,9 @@ class Sum extends React.Component {
   render() {
     let sum = 0;
     this.props.goods.forEach((book) => {
-      console.log(book.price);
       sum += +(book.price * book.count);
     });
-    return <div> Загальна вартість: {sum.toFixed(2)} </div>;
+    return <div> The total cost: ${sum.toFixed(2)} </div>;
   }
 }
 
@@ -180,7 +179,7 @@ class Count extends React.Component {
     this.props.goods.forEach((book) => {
       count += book.count;
     });
-    return <div> Кількість книг у кошику: {count} </div>;
+    return <div> Number of books in the basket: {count} </div>;
   }
 }
 
