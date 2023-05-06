@@ -1,41 +1,31 @@
-import {Component} from 'react';
+import React, { useState } from "react";
+
+const SortPanel = ({ onUpdateSort }) => {
+  const [isChecked, setIsChecked] = useState(false);
 
 
-class SortPanel extends Component {
+  const toggleChange = (e) => {
+  const newValue = !isChecked;
+  setIsChecked(newValue);
+  onUpdateSort(newValue);
+ };
 
-
-    constructor(props) {
-        super(props);
-        this.state = {
-          isChecked: false,
-        };
-      }
-
-
-      toggleChange = (e) => {
-    
-        // this.setState({
-        //   isChecked: !this.state.isChecked,
-        // });
-
-        this.state.isChecked = !this.state.isChecked;
-
-        this.props.onUpdateSort(this.state.isChecked);
-      }
-
-
-    render(){
-        return (
-            <div className="container">
-          <div className="form-check">
-                <input type = "checkbox" id="sort-by-name"
-                    className="form-control form-check-input mt-0 p-1"
-                    defaultChecked={this.state.isChecked} onChange={this.toggleChange}/>
-                    <label htmlFor='sort-by-name' className='form-check-label'>
-                        Sort by name</label>
-            </div>
-            </div>);
-  }
-}
+  return (
+    <div className="container">
+      <div className="form-check">
+        <input
+          type="checkbox"
+          id="sort-by-name"
+          className="form-control form-check-input mt-0 p-1"
+          defaultChecked={isChecked}
+          onChange={toggleChange}
+        />
+        <label htmlFor="sort-by-name" className="form-check-label">
+          Sort by name
+        </label>
+      </div>
+    </div>
+  );
+};
 
 export default SortPanel;
