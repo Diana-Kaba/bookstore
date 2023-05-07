@@ -1,5 +1,5 @@
 // import React from "react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import booksData from "./books.js";
 import logo from "./comic-logo.png";
@@ -14,9 +14,19 @@ import SortPanel from "./SortPanel.jsx";
 // class App extends React.Component {
 const App = () => {
   const [books, setBooks] = useState(booksData);
-  const [cart, setCart] = useState(getBookData);
+  // const [cart, setCart] = useState(getBookData);
   const [term, setTerm] = useState("");
   const [isChecked, setIsChecked] = useState(false);
+  const [cart, setCart] = useState(() => {
+    // getting stored value
+    const saved = localStorage.getItem("cart");
+    const initialValue = JSON.parse(saved);
+    return initialValue || [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
   const removeBook = (book) => {
     let goods = books;
@@ -29,7 +39,7 @@ const App = () => {
   const addBookToCart = (book) => {
     let goods = [...cart];
     goods.length && goods.includes(book) ? book.count++ : goods.push(book);
-    setBookData(goods);
+    // setBookData(goods);
     setCart(goods);
   };
 
@@ -42,7 +52,7 @@ const App = () => {
         item.id === book.id ? book.count-- : book.count
       );
     }
-    setBookData(goods);
+    // setBookData(goods);
     setCart(goods);
   };
 
@@ -147,15 +157,15 @@ const App = () => {
   );
 };
 
-const getBookData = () => {
-  return localStorage.getItem("goods")
-    ? JSON.parse(localStorage.getItem("goods"))
-    : [];
-};
+// const getBookData = () => {
+//   return localStorage.getItem("goods")
+//     ? JSON.parse(localStorage.getItem("goods"))
+//     : [];
+// };
 
-const setBookData = (o) => {
-  localStorage.setItem("goods", JSON.stringify(o));
-};
+// const setBookData = (o) => {
+//   localStorage.setItem("goods", JSON.stringify(o));
+// };
 
 function Header(props) {
   return (
