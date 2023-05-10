@@ -187,14 +187,12 @@ const Sum = (props) => {
   return <div> Суммарна вартість: {sum.toFixed(2)} </div>;
 };
 
-class Count extends React.Component {
-  render() {
+const Count = (props) => {
     let count = 0;
-    this.props.goods.forEach((book) => {
+    props.goods.forEach((book) => {
       count += book.count;
     });
     return <div> Number of books in the basket: {count} </div>;
-  }
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
