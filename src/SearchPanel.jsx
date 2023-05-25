@@ -14,7 +14,7 @@ const SearchPanel = ({ onUpdateSearch }) => {
       <input
         type="text"
         className="form-control search-input"
-        placeholder="Search"
+        placeholder="Шукати..."
         value={term}
         onChange={handleUpdateSearch}
       />

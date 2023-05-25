@@ -21,7 +21,7 @@ const SortPanel = ({ onUpdateSort }) => {
           onChange={toggleChange}
         />
         <label htmlFor="sort-by-name" className="form-check-label">
-          Sort by name
+          Сортувати по імені
         </label>
       </div>
     </div>

@@ -1,24 +1,20 @@
-// import React from "react";
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import booksData from "./books.js";
-import logo from "./comic-logo.png";
+import recipesData from "./recipes.js";
+import logo from "./icon.png";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./books.css";
-import BookItem from "./BookItem.jsx";
+import "./index.css";
+import RecipItem from "./RecipItem.jsx";
 import Image from "./Image.jsx";
 import SearchPanel from "./SearchPanel.jsx";
 import SortPanel from "./SortPanel.jsx";
 
-// class App extends React.Component {
 const App = () => {
-  const [books, setBooks] = useState(booksData);
-  // const [cart, setCart] = useState(getBookData);
+  const [recipes, setRecipes] = useState(recipesData);
   const [term, setTerm] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   const [cart, setCart] = useState(() => {
-    // getting stored value
     const saved = localStorage.getItem("cart");
     const initialValue = JSON.parse(saved);
     return initialValue || [];
@@ -28,35 +24,33 @@ const App = () => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const removeBook = (book) => {
-    let goods = books;
-    const updateBooks = goods.filter(function (item) {
-      return item.id !== book.id;
+  const removeRecipe = (recipe) => {
+    let goods = recipes;
+    const updateRecipes = goods.filter(function (item) {
+      return item.id !== recipe.id;
     });
-    setBooks(updateBooks);
+    setRecipes(updateRecipes);
   };
 
-  const addBookToCart = (book) => {
+  const addRecipeToList = (recipe) => {
     let goods = [...cart];
-    goods.length && goods.includes(book) ? book.count++ : goods.push(book);
-    // setBookData(goods);
+    goods.length && goods.includes(recipe) ? recipe.count++ : goods.push(recipe);
     setCart(goods);
   };
 
-  const deleteBookFromCart = (book) => {
+  const deleteRecipeFromList = (recipe) => {
     let goods;
-    if (book.count === 1) {
-      goods = cart.filter((item) => item.id !== book.id);
+    if (recipe.count === 1) {
+      goods = cart.filter((item) => item.id !== recipe.id);
     } else {
       goods = cart.filter((item) =>
-        item.id === book.id ? book.count-- : book.count
+        item.id === recipe.id ? recipe.count-- : recipe.count
       );
     }
-    // setBookData(goods);
     setCart(goods);
   };
 
-  const searchBook = (items, term) => {
+  const searchRecipe = (items, term) => {
     if (term.length === 0) {
       return items;
     }
@@ -69,7 +63,7 @@ const App = () => {
     setTerm(term);
   };
 
-  const sortBook = (items, isChecked) => {
+  const sortRecipe = (items, isChecked) => {
     if (isChecked) {
       return items.sort((a, b) =>
         a.name < b.name ? -1 : a.name === b.name ? 0 : 1
@@ -83,11 +77,11 @@ const App = () => {
     setIsChecked(isChecked);
   };
 
-  const visibleBooks = searchBook(sortBook(books, isChecked), term);
+  const visiblerecipes = searchRecipe(sortRecipe(recipes, isChecked), term);
 
   return (
     <div>
-      <Header className="header container-fluid p-5 bg-dark text-primary text-center" />
+      <Header className="container-fluid p-5 bg-dark text-white text-center" />
       <div className="container text-center">
         <div className="row">
           <div className="search-panel col-4 my-3">
@@ -101,15 +95,14 @@ const App = () => {
         </div>
 
         <div className="row justify-content-center">
-          {visibleBooks.map((book) => {
-            // console.log(book.id);
+          {visiblerecipes.map((recipe) => {
             return (
-              <div key={book.id} className="col-sm-4 col-12">
+              <div key={recipe.id} className="col-sm-4 col-12">
                 <div className="card text-center my-5 p-3">
-                  <BookItem
-                    book={book}
-                    removeBook={removeBook}
-                    addBookToCart={addBookToCart}
+                  <RecipItem
+                    recipe={recipe}
+                    removeRecipe={removeRecipe}
+                    addRecipeToList={addRecipeToList}
                   />
                 </div>
               </div>
@@ -118,20 +111,19 @@ const App = () => {
         </div>
       </div>
       <div className="container-fluid text-center">
-        <h4>Кошик товарів</h4>
-        <p>Кількість книг: {cart.length} </p>
+        <h4 className="display-6">Відібрані рецепти</h4>
 
         <ul className="list-group">
-          {cart.map((book) => (
-            <li key={book.id} className="list-group-item">
+          {cart.map((recipe) => (
+            <li key={recipe.id} className="list-group-item">
               <div className="row">
-                <div className="col-4">{book.name}</div>
-                <div className="col-3">{book.author}</div>
-                <div className="col-2">{book.price}</div>
-                <div className="col-1">{book.count}</div>
+                <div className="col-4">{recipe.name}</div>
+                <div className="col-3">{recipe.ingredients}</div>
+                <div className="col-2">{recipe.price}</div>
+                <div className="col-1">{recipe.count}</div>
                 <div className="col-2">
                   <button
-                    onClick={() => deleteBookFromCart(book)}
+                    onClick={() => deleteRecipeFromList(recipe)}
                     type="button"
                     className="btn btn-outline-primary mt-auto mb-2"
                   >
@@ -157,21 +149,16 @@ const App = () => {
   );
 };
 
-// const getBookData = () => {
-//   return localStorage.getItem("goods")
-//     ? JSON.parse(localStorage.getItem("goods"))
-//     : [];
-// };
-
-// const setBookData = (o) => {
-//   localStorage.setItem("goods", JSON.stringify(o));
-// };
-
-function Header(props) {
+const Header = (props) => {
   return (
     <div className={props.className}>
       <Image src={logo} />
-      <h1 className="display-2">Comic book store</h1>
+      <h1 className="display-4">Каталог рецептів</h1>
+      <p className="display">
+        Хочете їсти смачні страви? Хочете дізнатися більше про те, як їх
+        готувати? На цій сторінці ви знайдете добірку статей з найкращими
+        рецептами!
+      </p>
     </div>
   );
 }
@@ -179,9 +166,8 @@ function Header(props) {
 const Sum = (props) => {
   let sum = 0;
   if (props.goods) {
-    props.goods.forEach((book) => {
-      // console.log(book.price);
-      sum += +(book.price * book.count);
+    props.goods.forEach((recipe) => {
+      sum += +(recipe.price * recipe.count);
     });
   }
   return <div> Суммарна вартість: {sum.toFixed(2)} </div>;
@@ -189,10 +175,10 @@ const Sum = (props) => {
 
 const Count = (props) => {
     let count = 0;
-    props.goods.forEach((book) => {
-      count += book.count;
+    props.goods.forEach((recipe) => {
+      count += recipe.count;
     });
-    return <div> Number of books in the basket: {count} </div>;
+    return <div> Кількість рецептів у списку: {count} </div>;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
