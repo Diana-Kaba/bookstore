@@ -9,6 +9,7 @@ import RecipItem from "./RecipItem.jsx";
 import Image from "./Image.jsx";
 import SearchPanel from "./SearchPanel.jsx";
 import SortPanel from "./SortPanel.jsx";
+//import SortPrice from "./SortPrice";
 
 const App = () => {
   const [recipes, setRecipes] = useState(recipesData);
@@ -34,7 +35,9 @@ const App = () => {
 
   const addRecipeToList = (recipe) => {
     let goods = [...cart];
-    goods.length && goods.includes(recipe) ? recipe.count++ : goods.push(recipe);
+    goods.length && goods.includes(recipe)
+      ? recipe.count++
+      : goods.push(recipe);
     setCart(goods);
   };
 
@@ -81,10 +84,10 @@ const App = () => {
 
   return (
     <div>
-      <Header className="container-fluid p-5 bg-dark text-white text-center" />
+      <Header className="container-fluid p-3 bg-light text-center" />
       <div className="container text-center">
         <div className="row">
-          <div className="search-panel col-4 my-3">
+          <div className="search-panel col-4 my-3" id="search-panel">
             <SearchPanel onUpdateSearch={onUpdateSearch} />
           </div>
         </div>
@@ -98,7 +101,7 @@ const App = () => {
           {visiblerecipes.map((recipe) => {
             return (
               <div key={recipe.id} className="col-sm-4 col-12">
-                <div className="card text-center my-5 p-3">
+                <div className="card text-center my-5 p-3" id="recip-item">
                   <RecipItem
                     recipe={recipe}
                     removeRecipe={removeRecipe}
@@ -110,17 +113,19 @@ const App = () => {
           })}
         </div>
       </div>
-      <div className="container-fluid text-center">
-        <h4 className="display-6">Відібрані рецепти</h4>
+      <div className="container-fluid text-center" id="selected-recipes">
+        <h4 className="display-6 text-center mb-4">Відібрані рецепти</h4>
 
-        <ul className="list-group">
+        {/* <ul className="list-group">
           {cart.map((recipe) => (
             <li key={recipe.id} className="list-group-item">
               <div className="row">
                 <div className="col-4">{recipe.name}</div>
-                <div className="col-3">{recipe.ingredients}</div>
-                <div className="col-2">{recipe.price}</div>
-                <div className="col-1">{recipe.count}</div>
+                <div className="col-4 text-start">{recipe.ingredients}</div>
+                <div className="col-1">${recipe.price}</div>
+                <div className="col-1">
+                  <span class="badge bg-dark rounded-pill">{recipe.count}</span>
+                </div>
                 <div className="col-2">
                   <button
                     onClick={() => deleteRecipeFromList(recipe)}
@@ -133,7 +138,39 @@ const App = () => {
               </div>
             </li>
           ))}
-        </ul>
+        </ul> */}
+        <table class="table bg-light">
+          <thead class="table-warning">
+            <tr>
+              <th>Name</th>
+              <th>Ingredients</th>
+              <th>Price</th>
+              <th>Count</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          {cart.map((recipe) => (
+            <tbody key={recipe.id}>
+              <tr>
+                <td>{recipe.name}</td>
+                <td>{recipe.ingredients}</td>
+                <td>${recipe.price}</td>
+                <td>
+                  <span class="badge bg-dark rounded-pill">{recipe.count}</span>
+                </td>
+                <td>
+                  <button
+                    onClick={() => deleteRecipeFromList(recipe)}
+                    type="button"
+                    className="btn btn-outline-primary mt-auto mb-2"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          ))}
+        </table>
         <div className="row">
           <div className="col-12">
             <Count goods={cart} />
@@ -145,6 +182,7 @@ const App = () => {
           </div>
         </div>
       </div>
+      <Footer></Footer>
     </div>
   );
 };
@@ -153,15 +191,47 @@ const Header = (props) => {
   return (
     <div className={props.className}>
       <Image src={logo} />
-      <h1 className="display-4">Каталог рецептів</h1>
-      <p className="display">
+      <h1 className="display-4 fw-normal text-dark">Каталог рецептів</h1>
+      <p className="fs-5 text-muted">
         Хочете їсти смачні страви? Хочете дізнатися більше про те, як їх
-        готувати? На цій сторінці ви знайдете добірку статей з найкращими
-        рецептами!
+        готувати? <br></br> На цій сторінці ви знайдете добірку статей з
+        найкращими рецептами!
       </p>
     </div>
   );
-}
+};
+
+const Footer = (props) => {
+  return (
+    <div class="container-fluid bg-light">
+      <footer class="py-3 mt-5">
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+          <li class="nav-item">
+            <a href="#" class="nav-link px-2 text-muted">
+              Up
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#search-panel" class="nav-link px-2 text-muted">
+              Search
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#recip-item" class="nav-link px-2 text-muted">
+              Recipes
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#selected-recipes" class="nav-link px-2 text-muted">
+              Selected recipes
+            </a>
+          </li>
+        </ul>
+        <p class="text-center text-muted">&copy; 2023 Company, Inc</p>
+      </footer>
+    </div>
+  );
+};
 
 const Sum = (props) => {
   let sum = 0;
@@ -170,15 +240,15 @@ const Sum = (props) => {
       sum += +(recipe.price * recipe.count);
     });
   }
-  return <div> Суммарна вартість: {sum.toFixed(2)} </div>;
+  return <div> Загальна вартість: ${sum.toFixed(2)} </div>;
 };
 
 const Count = (props) => {
-    let count = 0;
-    props.goods.forEach((recipe) => {
-      count += recipe.count;
-    });
-    return <div> Кількість рецептів у списку: {count} </div>;
-}
+  let count = 0;
+  props.goods.forEach((recipe) => {
+    count += recipe.count;
+  });
+  return <div> Кількість рецептів у списку: {count} </div>;
+};
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
