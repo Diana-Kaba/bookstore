@@ -9,12 +9,13 @@ import RecipItem from "./RecipItem.jsx";
 import Image from "./Image.jsx";
 import SearchPanel from "./SearchPanel.jsx";
 import SortPanel from "./SortPanel.jsx";
-//import SortPrice from "./SortPrice";
+import SortPrice from "./SortPrice";
 
 const App = () => {
   const [recipes, setRecipes] = useState(recipesData);
   const [term, setTerm] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
+  const [isSortByName, setIsSortByName] = useState(false);
+  const [isSortByPrice, setIsSortByPrice] = useState(false);
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem("cart");
     const initialValue = JSON.parse(saved);
@@ -26,31 +27,33 @@ const App = () => {
   }, [cart]);
 
   const removeRecipe = (recipe) => {
-    let goods = recipes;
-    const updateRecipes = goods.filter(function (item) {
-      return item.id !== recipe.id;
-    });
-    setRecipes(updateRecipes);
+    const updatedRecipes = recipes.filter((item) => item.id !== recipe.id);
+    setRecipes(updatedRecipes);
   };
 
   const addRecipeToList = (recipe) => {
-    let goods = [...cart];
-    goods.length && goods.includes(recipe)
-      ? recipe.count++
-      : goods.push(recipe);
-    setCart(goods);
+    let updatedCart = [...cart];
+    const existingRecipeIndex = updatedCart.findIndex(
+      (item) => item.id === recipe.id
+    );
+    if (existingRecipeIndex !== -1) {
+      updatedCart[existingRecipeIndex].count++;
+    } else {
+      updatedCart.push({ ...recipe, count: 1 });
+    }
+    setCart(updatedCart);
   };
 
   const deleteRecipeFromList = (recipe) => {
-    let goods;
+    let updatedCart;
     if (recipe.count === 1) {
-      goods = cart.filter((item) => item.id !== recipe.id);
+      updatedCart = cart.filter((item) => item.id !== recipe.id);
     } else {
-      goods = cart.filter((item) =>
-        item.id === recipe.id ? recipe.count-- : recipe.count
+      updatedCart = cart.map((item) =>
+        item.id === recipe.id ? { ...item, count: item.count - 1 } : item
       );
     }
-    setCart(goods);
+    setCart(updatedCart);
   };
 
   const searchRecipe = (items, term) => {
@@ -58,33 +61,40 @@ const App = () => {
       return items;
     }
     return items.filter((item) => {
-      return item.name.indexOf(term) > -1;
+      return item.name.toLowerCase().includes(term.toLowerCase());
     });
+  };
+
+  const sortRecipes = (items) => {
+    let sortedItems = [...items];
+    if (isSortByName) {
+      sortedItems.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      );
+    }
+    if (isSortByPrice) {
+      sortedItems.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    }
+    return sortedItems;
   };
 
   const onUpdateSearch = (term) => {
     setTerm(term);
   };
 
-  const sortRecipe = (items, isChecked) => {
-    if (isChecked) {
-      return items.sort((a, b) =>
-        a.name < b.name ? -1 : a.name === b.name ? 0 : 1
-      );
-    } else {
-      return items.sort((a, b) => a.id - b.id);
-    }
+  const onUpdateSortByName = (isChecked) => {
+    setIsSortByName(isChecked);
   };
 
-  const onUpdateSort = (isChecked) => {
-    setIsChecked(isChecked);
+  const onUpdateSortByPrice = (isChecked) => {
+    setIsSortByPrice(isChecked);
   };
 
-  const visiblerecipes = searchRecipe(sortRecipe(recipes, isChecked), term);
+  const visibleRecipes = sortRecipes(searchRecipe(recipes, term));
 
   return (
     <div>
-      <Header className="container-fluid p-3 bg-light text-center" />
+      <Header />
       <div className="container text-center">
         <div className="row">
           <div className="search-panel col-4 my-3" id="search-panel">
@@ -93,12 +103,17 @@ const App = () => {
         </div>
         <div className="row">
           <div className="col-3 my-3">
-            <SortPanel onUpdateSort={onUpdateSort} />
+            <SortPanel onUpdateSortByName={onUpdateSortByName} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-3 my-3">
+            <SortPrice onUpdateSortByPrice={onUpdateSortByPrice} />
           </div>
         </div>
 
         <div className="row justify-content-center">
-          {visiblerecipes.map((recipe) => {
+          {visibleRecipes.map((recipe) => {
             return (
               <div key={recipe.id} className="col-sm-4 col-12">
                 <div className="card text-center my-5 p-3" id="recip-item">
@@ -115,32 +130,8 @@ const App = () => {
       </div>
       <div className="container-fluid text-center" id="selected-recipes">
         <h4 className="display-6 text-center mb-4">Відібрані рецепти</h4>
-
-        {/* <ul className="list-group">
-          {cart.map((recipe) => (
-            <li key={recipe.id} className="list-group-item">
-              <div className="row">
-                <div className="col-4">{recipe.name}</div>
-                <div className="col-4 text-start">{recipe.ingredients}</div>
-                <div className="col-1">${recipe.price}</div>
-                <div className="col-1">
-                  <span class="badge bg-dark rounded-pill">{recipe.count}</span>
-                </div>
-                <div className="col-2">
-                  <button
-                    onClick={() => deleteRecipeFromList(recipe)}
-                    type="button"
-                    className="btn btn-outline-primary mt-auto mb-2"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul> */}
-        <table class="table bg-light">
-          <thead class="table-warning">
+        <table className="table bg-light table-bordered">
+          <thead className="table-warning">
             <tr>
               <th>Name</th>
               <th>Ingredients</th>
@@ -156,13 +147,15 @@ const App = () => {
                 <td>{recipe.ingredients}</td>
                 <td>${recipe.price}</td>
                 <td>
-                  <span class="badge bg-dark rounded-pill">{recipe.count}</span>
+                  <span className="badge bg-warning rounded-pill text-dark">
+                    {recipe.count}
+                  </span>
                 </td>
                 <td>
                   <button
                     onClick={() => deleteRecipeFromList(recipe)}
                     type="button"
-                    className="btn btn-outline-primary mt-auto mb-2"
+                    className="btn btn-outline-warning mt-auto mb-2"
                   >
                     Delete
                   </button>
@@ -171,15 +164,26 @@ const App = () => {
             </tbody>
           ))}
         </table>
-        <div className="row">
-          <div className="col-12">
-            <Count goods={cart} />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            <Sum goods={cart} />
-          </div>
+        <div id="second-table">
+          <table className="table bg-light table-bordered">
+            <tbody>
+              <tr>
+                <td className="table-warning fst-italic">
+                  Number of selected recipes
+                </td>
+                <td className="text-center">
+                  {" "}
+                  <Count goods={cart} />
+                </td>
+              </tr>
+              <tr>
+                <td className="table-warning fst-italic">The total cost</td>
+                <td className="text-center">
+                  <Sum goods={cart} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <Footer></Footer>
@@ -189,7 +193,7 @@ const App = () => {
 
 const Header = (props) => {
   return (
-    <div className={props.className}>
+    <div className="container-fluid p-0 m-0 bg-light text-center" id="header">
       <Image src={logo} />
       <h1 className="display-4 fw-normal text-dark">Каталог рецептів</h1>
       <p className="fs-5 text-muted">
@@ -197,37 +201,92 @@ const Header = (props) => {
         готувати? <br></br> На цій сторінці ви знайдете добірку статей з
         найкращими рецептами!
       </p>
+      <nav
+        className="navbar navbar-expand-sm justify-content-center"
+        id="navigation"
+      >
+        <ul className="navbar-nav">
+          <li className="navbar-brand">
+            <a className="nav-link text-light" href="#search-panel">
+              Search
+            </a>
+          </li>
+          <li className="navbar-brand">
+            <a className="nav-link text-light" href="#recip-item">
+              Recipes
+            </a>
+          </li>
+          <li className="navbar-brand">
+            <a className="nav-link text-light" href="#selected-recipes">
+              Selected recipes
+            </a>
+          </li>
+          <li className="navbar-brand">
+            <a className="nav-link text-light" href="#footer">
+              {" "}
+              <button type="button" className="btn btn-warning">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-arrow-down"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"
+                  />
+                </svg>
+              </button>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 };
 
 const Footer = (props) => {
   return (
-    <div class="container-fluid bg-light">
-      <footer class="py-3 mt-5">
-        <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-          <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-muted">
-              Up
+    <div className="container-fluid bg-light">
+      <footer className="py-3 mt-5" id="footer">
+        <ul className="nav justify-content-center border-bottom pb-3 mb-3">
+          <li className="navbar-brand">
+            <a className="nav-link text-dark" href="#header">
+              {" "}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-arrow-up"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"
+                />
+              </svg>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="#search-panel" class="nav-link px-2 text-muted">
+          <li className="nav-item">
+            <a href="#search-panel" className="nav-link px-2 text-muted">
               Search
             </a>
           </li>
-          <li class="nav-item">
-            <a href="#recip-item" class="nav-link px-2 text-muted">
+          <li className="nav-item">
+            <a href="#recip-item" className="nav-link px-2 text-muted">
               Recipes
             </a>
           </li>
-          <li class="nav-item">
-            <a href="#selected-recipes" class="nav-link px-2 text-muted">
+          <li className="nav-item">
+            <a href="#selected-recipes" className="nav-link px-2 text-muted">
               Selected recipes
             </a>
           </li>
         </ul>
-        <p class="text-center text-muted">&copy; 2023 Company, Inc</p>
+        <p className="text-center text-muted">&copy; 2023 Diana, Recipes</p>
       </footer>
     </div>
   );
@@ -240,7 +299,11 @@ const Sum = (props) => {
       sum += +(recipe.price * recipe.count);
     });
   }
-  return <div> Загальна вартість: ${sum.toFixed(2)} </div>;
+  return (
+    <div>
+      <span class="badge bg-success">${sum.toFixed(2)}</span>
+    </div>
+  );
 };
 
 const Count = (props) => {
@@ -248,7 +311,7 @@ const Count = (props) => {
   props.goods.forEach((recipe) => {
     count += recipe.count;
   });
-  return <div> Кількість рецептів у списку: {count} </div>;
+  return <div>{count}</div>;
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);

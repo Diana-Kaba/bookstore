@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 
-const SortPanel = ({ onUpdateSort }) => {
+const SortPanel = ({ onUpdateSortByName }) => {
   const [isChecked, setIsChecked] = useState(false);
 
-
   const toggleChange = (e) => {
-  const newValue = !isChecked;
-  setIsChecked(newValue);
-  onUpdateSort(newValue);
- };
+    const newValue = !isChecked;
+    setIsChecked(newValue);
+    onUpdateSortByName(newValue);
+  };
 
   return (
     <div className="container">
@@ -21,7 +20,7 @@ const SortPanel = ({ onUpdateSort }) => {
           onChange={toggleChange}
         />
         <label htmlFor="sort-by-name" className="form-check-label">
-          Сортувати по імені
+          Сортувати за назвою
         </label>
       </div>
     </div>
